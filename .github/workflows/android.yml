@@ -16,17 +16,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # HATA ÇÖZÜMÜ: Eski tüm gradle dosyalarını silip en baştan kuruyoruz
-      - name: Rebuild Gradle Wrapper
+      # HATA ÇÖZÜMÜ: Sistemdeki gradle'ı kullanma, kendi gradlew'ımızı manuel indir ve kur
+      - name: Force Clean Wrapper
         run: |
           rm -rf gradle/wrapper/
           mkdir -p gradle/wrapper
-          # Gradle 8.4 sürümünü doğrudan sistem komutuyla zorla yüklüyoruz
-          gradle wrapper --gradle-version 8.4 --distribution-type bin
+          # Gradle 8.4'ü doğrudan JAR ve script olarak indiriyoruz
+          curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar
+          curl -L -o gradlew https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradlew
           chmod +x gradlew
 
-      - name: Build with Gradle
-        # gradlew dosyasını doğrudan çalıştır
+      - name: Build with Gradle 8.4
         run: ./gradlew :app:assembleDebug
 
       - name: Upload APK
