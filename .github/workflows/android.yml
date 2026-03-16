@@ -16,16 +16,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Sistemdeki gradle komutunu kullanma! 
-      # Dosyaları silip gradlew scriptini kullanmaya hazırla.
-      - name: Prep Gradle Wrapper
+      - name: Build with Gradle
         run: |
           chmod +x gradlew
-          ./gradlew wrapper --gradle-version 8.4
-
-      # Sadece gradlew kullanarak derle
-      - name: Build with Gradle
-        run: ./gradlew assembleDebug
+          ./gradlew :app:assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
