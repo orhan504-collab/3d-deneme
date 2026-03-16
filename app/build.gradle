@@ -22,25 +22,17 @@ android {
     
     kotlinOptions {
         jvmTarget = '17'
+        // Hatalı olan -Xno-param-suggestions kaldırıldı
+        freeCompilerArgs += ["-opt-in=kotlin.RequiresOptIn"]
     }
 
-    // Derleme esnasında çöp dosya oluşumunu ve gereksiz uyarıları minimize eden yapı:
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-        kotlinOptions {
-            freeCompilerArgs += [
-                "-Xno-param-suggestions",
-                "-opt-in=kotlin.RequiresOptIn"
-            ]
-        }
-    }
-    
-    // Build klasörünü temiz tutmak için ek yapılandırma
     buildFeatures {
-        buildConfig true
+        viewBinding true
     }
 }
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
 }
