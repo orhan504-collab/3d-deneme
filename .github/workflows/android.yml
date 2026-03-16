@@ -16,11 +16,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Hata 126'yı önlemek için önce izin ver, sonra çalıştır
-      - name: Configure Gradle Wrapper
+      # Hatanın kök çözümü: 
+      # 1. Wrapper'ı yeniden oluştur (jar dosyasını sıfırdan yaratır)
+      # 2. Çalıştırma iznini ver
+      - name: Setup Gradle Wrapper
         run: |
+          gradle wrapper --gradle-version 8.4 --distribution-type bin
           chmod +x gradlew
-          ./gradlew wrapper --gradle-version 8.4 --distribution-type bin
 
       - name: Build with Gradle
         run: ./gradlew assembleDebug
