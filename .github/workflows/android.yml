@@ -16,17 +16,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Hata 1: Gradyan versiyonunu zorla 8.4'e sabitle (9.x sürümünü engelle)
-      # Hata 2: İzinleri baştan ver
-      - name: Force Gradle 8.4
+      # Sistemdeki gradle komutunu kullanma! 
+      # Dosyaları silip gradlew scriptini kullanmaya hazırla.
+      - name: Prep Gradle Wrapper
         run: |
-          rm -rf gradle/wrapper/gradle-wrapper.jar
-          gradle wrapper --gradle-version 8.4 --distribution-type bin
           chmod +x gradlew
+          ./gradlew wrapper --gradle-version 8.4
 
-      # Hata 3: Projeyi kökten değil, modül bazlı derle
+      # Sadece gradlew kullanarak derle
       - name: Build with Gradle
-        run: ./gradlew :app:assembleDebug --no-daemon
+        run: ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
