@@ -16,7 +16,17 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <ImageButton
+
+       <ImageButton
+            android:id="@+id/btn_add_cube" 
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="#2ECC71"
+            android:src="@android:drawable/ic_input_add"
+            android:contentDescription="Küp Ekle" />
+        
+        
+       <ImageButton
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:background="?attr/selectableItemBackground"
