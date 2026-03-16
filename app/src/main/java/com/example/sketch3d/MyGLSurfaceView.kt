@@ -5,13 +5,15 @@ import android.opengl.GLSurfaceView
 import android.view.MotionEvent
 
 class MyGLSurfaceView(context: Context) : GLSurfaceView(context) {
-    val renderer = MyRenderer()
+    // Renderer'ı kendi sınıf adıyla (MyRenderer) tanımlıyoruz
+    val myRenderer = MyRenderer() 
+
     private var previousX: Float = 0f
     private var previousY: Float = 0f
 
     init {
         setEGLContextClientVersion(2)
-        setRenderer(renderer)
+        setRenderer(myRenderer) // Kendi renderer'ımızı atıyoruz
         renderMode = RENDERMODE_CONTINUOUSLY
     }
 
@@ -23,8 +25,11 @@ class MyGLSurfaceView(context: Context) : GLSurfaceView(context) {
             MotionEvent.ACTION_MOVE -> {
                 val dx = x - previousX
                 val dy = y - previousY
-                renderer.angleX += dx * 0.3f
-                renderer.angleY += dy * 0.3f
+                
+                // myRenderer üzerinden değişkenlere erişiyoruz
+                myRenderer.angleX += dx * 0.3f
+                myRenderer.angleY += dy * 0.3f
+                requestRender()
             }
         }
         previousX = x
