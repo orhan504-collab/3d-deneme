@@ -8,26 +8,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <LinearLayout
-        android:id="@+id/bottom_menu"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/btn_cube"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#333333"
-        android:orientation="horizontal"
-        android:padding="10dp">
-
-        <Button
-            android:id="@+id/btn_cube"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Küp Ekle" />
-
-        <Button
-            android:id="@+id/btn_rotate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Döndür" />
-    </LinearLayout>
-
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:text="Küp Ekle" />
 </RelativeLayout>
