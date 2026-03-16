@@ -16,11 +16,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Gradle sürümünü garanti altına alıyoruz (8.4 sürümüne kilitliyoruz)
-      - name: Setup Gradle
+      # Hata 126'yı önlemek için önce izin ver, sonra çalıştır
+      - name: Configure Gradle Wrapper
         run: |
-          ./gradlew wrapper --gradle-version 8.4
           chmod +x gradlew
+          ./gradlew wrapper --gradle-version 8.4 --distribution-type bin
 
       - name: Build with Gradle
         run: ./gradlew assembleDebug
