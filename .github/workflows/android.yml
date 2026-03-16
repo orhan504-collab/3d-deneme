@@ -16,17 +16,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # HATA ÇÖZÜMÜ: Sistemdeki gradle'ı kullanma, kendi gradlew'ımızı manuel indir ve kur
-      - name: Force Clean Wrapper
+      # HATA ÇÖZÜMÜ: Eksik olan .properties dosyasını biz yaratıyoruz
+      - name: Setup Wrapper Files
         run: |
-          rm -rf gradle/wrapper/
           mkdir -p gradle/wrapper
-          # Gradle 8.4'ü doğrudan JAR ve script olarak indiriyoruz
-          curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar
-          curl -L -o gradlew https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradlew
+          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https\://services.gradle.org/originals/gradle-8.4-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          
+          # Wrapper'ı çalıştırılabilir yap
           chmod +x gradlew
 
-      - name: Build with Gradle 8.4
+      - name: Build with Gradle
         run: ./gradlew :app:assembleDebug
 
       - name: Upload APK
