@@ -16,10 +16,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # BU KOMUT .jar DOSYASINI SENİN YERİNE OTOMATİK OLUŞTURUR
-      - name: Generate Gradle Wrapper
+      # Gradle sürümünü garanti altına alıyoruz (8.4 sürümüne kilitliyoruz)
+      - name: Setup Gradle
         run: |
-          gradle wrapper --gradle-version 8.4 --distribution-type bin
+          ./gradlew wrapper --gradle-version 8.4
           chmod +x gradlew
 
       - name: Build with Gradle
