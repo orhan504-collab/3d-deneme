@@ -2,40 +2,44 @@ name: Android CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      # 1️⃣ Repo’yu çek
+      - uses: actions/checkout@v4
 
-      - name: Setup JDK 17
+      # 2️⃣ JDK 17 kurulumu
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 17
+          java-version: '17'
+          distribution: 'temurin'
 
+      # 3️⃣ Android SDK kurulumu
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      # 4️⃣ Gerekli SDK paketlerini yükle
       - name: Install SDK packages
         run: |
           sdkmanager "platform-tools"
-          sdkmanager "platforms;android-34"
-          sdkmanager "build-tools;34.0.0"
+          sdkmanager "platforms;android-34"      # Projende compileSdkVersion ile eşleşmeli
+          sdkmanager "build-tools;34.0.0"        # Projende buildToolsVersion ile eşleşmeli
+          yes | sdkmanager --licenses
 
-      - name: Accept licenses
-        run: yes | sdkmanager --licenses
-
-      - name: Give permission to gradlew
+      # 5️⃣ Gradle wrapper izinlerini ayarla
+      - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Build APK
-        run: ./gradlew assembleDebug --stacktrace
+      # 6️⃣ APK oluştur
+      - name: Build Debug APK
+        run: ./gradlew :app:assembleDebug
 
+      # 7️⃣ APK’yı yükle
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
