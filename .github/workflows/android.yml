@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Repo’yu çek
       - uses: actions/checkout@v4
 
       # 2️⃣ JDK 17 kurulumu
