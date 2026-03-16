@@ -9,7 +9,6 @@
         android:icon="@android:drawable/sym_def_app_icon"
         android:label="Sketch3D"
         android:hardwareAccelerated="true"
-        /* Çökmeyi önlemek için modern ve uyumlu bir tema seçtik */
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         
         <activity
