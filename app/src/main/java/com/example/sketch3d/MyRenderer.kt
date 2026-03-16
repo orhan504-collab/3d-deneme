@@ -17,8 +17,12 @@ class MyRenderer : GLSurfaceView.Renderer {
     private val vPMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
     private val viewMatrix = FloatArray(16)
+    private val rotationMatrix = FloatArray(16) // Dönüş için yeni matris
 
-    // Shader kodlarını basitleştirdik ki hata riski sıfıra insin
+    // Hata veren eksik değişkenleri buraya ekledik
+    var angleX: Float = 0f
+    var angleY: Float = 0f
+
     private val vertexShaderCode = """
         uniform mat4 uVPMatrix;
         attribute vec4 vPosition;
@@ -30,12 +34,13 @@ class MyRenderer : GLSurfaceView.Renderer {
     private val fragmentShaderCode = """
         precision mediump float;
         void main() {
-            gl_FragColor = vec4(0.5, 0.5, 0.6, 1.0); // Izgara rengi: Gri-Mavi
+            gl_FragColor = vec4(0.5, 0.5, 0.6, 1.0); 
         }
     """.trimIndent()
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        GLES20.glClearColor(0.1f, 0.1f, 0.12f, 1.0f) // Arka plan koyu gri
+        GLES20.glClearColor(0.1f, 0.1f, 0.12f, 1.0f)
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST) // Derinlik testini etkinleştir
         
         val vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
         val fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode)
@@ -45,12 +50,11 @@ class MyRenderer : GLSurfaceView.Renderer {
             GLES20.glLinkProgram(it)
         }
 
-        // Grid (Tabla) Koordinatları
         val gridData = mutableListOf<Float>()
         for (i in -10..10) {
             val f = i.toFloat() * 0.5f
-            gridData.addAll(listOf(f, 0f, -5f, f, 0f, 5f)) // Dikey
-            gridData.addAll(listOf(-5f, 0f, f, 5f, 0f, f)) // Yatay
+            gridData.addAll(listOf(f, 0f, -5f, f, 0f, 5f))
+            gridData.addAll(listOf(-5f, 0f, f, 5f, 0f, f))
         }
         val floatArray = gridData.toFloatArray()
         gridVertexCount = floatArray.size / 3
@@ -63,9 +67,18 @@ class MyRenderer : GLSurfaceView.Renderer {
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
 
-        // Kamerayı izgarayı görecek şekilde ayarla (Açı çok önemli!)
-        Matrix.setLookAtM(viewMatrix, 0, 4f, 6f, 10f, 0f, 0f, 0f, 0f, 1f, 0f)
-        Matrix.multiplyMM(vPMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
+        // 1. Statik Kamera Konumu
+        Matrix.setLookAtM(viewMatrix, 0, 0f, 6f, 12f, 0f, 0f, 0f, 0f, 1f, 0f)
+
+        // 2. Kullanıcı etkileşimine göre dönüş matrisini hesapla
+        val scratch = FloatArray(16)
+        val tempRotation = FloatArray(16)
+        Matrix.setRotateM(rotationMatrix, 0, angleX, 0f, 1f, 0f)
+        Matrix.rotateM(rotationMatrix, 0, angleY, 1f, 0f, 0f)
+
+        // 3. Matrisleri birleştir (Projection * View * Rotation)
+        Matrix.multiplyMM(scratch, 0, viewMatrix, 0, rotationMatrix, 0)
+        Matrix.multiplyMM(vPMatrix, 0, projectionMatrix, 0, scratch, 0)
 
         GLES20.glUseProgram(program)
         val matrixHandle = GLES20.glGetUniformLocation(program, "uVPMatrix")
@@ -73,8 +86,8 @@ class MyRenderer : GLSurfaceView.Renderer {
 
         val positionHandle = GLES20.glGetAttribLocation(program, "vPosition")
         GLES20.glEnableVertexAttribArray(positionHandle)
-            GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, gridBuffer)
-            GLES20.glDrawArrays(GLES20.GL_LINES, 0, gridVertexCount)
+        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, gridBuffer)
+        GLES20.glDrawArrays(GLES20.GL_LINES, 0, gridVertexCount)
         GLES20.glDisableVertexAttribArray(positionHandle)
     }
 
