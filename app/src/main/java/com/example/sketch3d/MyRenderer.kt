@@ -39,7 +39,7 @@ class MyRenderer : GLSurfaceView.Renderer {
     """.trimIndent()
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        GLES20.glClearColor(0.12f, 0.14f, 0.17f, 1.0f) // Koyu arka plan
+        GLES20.glClearColor(0.1f, 0.2f, 0.4f, 1.0f) // Koyu Mavi
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
 
         val vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
