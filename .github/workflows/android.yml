@@ -16,11 +16,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # gradlew ana dizinde olduğu için doğrudan çağırıyoruz
-      - name: Build with Gradle
+      # BU KOMUT .jar DOSYASINI SENİN YERİNE OTOMATİK OLUŞTURUR
+      - name: Generate Gradle Wrapper
         run: |
+          gradle wrapper --gradle-version 8.4 --distribution-type bin
           chmod +x gradlew
-          ./gradlew :app:assembleDebug
+
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
