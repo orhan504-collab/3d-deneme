@@ -16,15 +16,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Bu komut, projenin en kök dizininde olması gereken gradle dosyalarını 
-      # otomatik olarak yeniden oluşturur, böylece .jar hatası almazsın.
-      - name: Fix Gradle Wrapper
-        run: |
-          gradle wrapper --gradle-version 8.4
-          chmod +x gradlew
-
+      # gradlew ana dizinde olduğu için doğrudan çağırıyoruz
       - name: Build with Gradle
-        run: ./gradlew assembleDebug
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
