@@ -4,10 +4,12 @@ import android.content.Context
 import android.opengl.GLSurfaceView
 
 class MyGLSurfaceView(context: Context) : GLSurfaceView(context) {
-    private val renderer = MyRenderer()
+    // 'private' anahtar kelimesini kaldırdık ki dışarıdan erişilebilsin
+    val renderer = MyRenderer()
 
     init {
-        setEGLContextClientVersion(2) // OpenGL ES 2.0
+        setEGLContextClientVersion(2)
         setRenderer(renderer)
+        renderMode = RENDERMODE_CONTINUOUSLY
     }
 }
