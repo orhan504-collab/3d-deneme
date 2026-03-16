@@ -7,19 +7,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Build with Full Debug
-        run: |
-          chmod +x gradlew
-          ./gradlew clean assembleDebug --stacktrace --info --debug
+          # Gradle cache kullanarak gereksiz dosya oluşumunu engeller
+          cache: gradle
+          
+      - name: Grant Execute Permission
+        run: chmod +x gradlew
+        
+      - name: Clean and Build
+        # --no-daemon ve --parallel kullanarak daha temiz bir derleme süreci
+        run: ./gradlew clean assembleDebug --no-daemon --parallel
+        
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
+          # Sadece APK dosyasını sakla, build klasörünün tamamını değil
+          if-no-files-found: error
           
