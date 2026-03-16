@@ -16,18 +16,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Gradle 9 yerine 8.4'ü zorunlu kılıyoruz
-      - name: Setup Gradle 8.4
+      # Hata 1: Gradyan versiyonunu zorla 8.4'e sabitle (9.x sürümünü engelle)
+      # Hata 2: İzinleri baştan ver
+      - name: Force Gradle 8.4
         run: |
+          rm -rf gradle/wrapper/gradle-wrapper.jar
           gradle wrapper --gradle-version 8.4 --distribution-type bin
           chmod +x gradlew
 
-      # Hatanın detaylarını görmek için --stacktrace ve --info ekledik
+      # Hata 3: Projeyi kökten değil, modül bazlı derle
       - name: Build with Gradle
-        run: ./gradlew assembleDebug --stacktrace --info
+        run: ./gradlew :app:assembleDebug --no-daemon
 
       - name: Upload APK
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
