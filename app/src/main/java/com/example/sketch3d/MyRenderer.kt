@@ -10,7 +10,7 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 class MyRenderer : GLSurfaceView.Renderer {
-    // MyGLSurfaceView'dan gelen dönüş değerleri (Hatanın çözümü burada)
+    // BU SATIRLAR ÇOK ÖNEMLİ: MyGLSurfaceView bu değişkenlere erişecek
     var angleX: Float = 0f
     var angleY: Float = 0f
 
@@ -34,12 +34,12 @@ class MyRenderer : GLSurfaceView.Renderer {
     private val fragmentShaderCode = """
         precision mediump float;
         void main() {
-            gl_FragColor = vec4(0.4, 0.4, 0.45, 1.0); 
+            gl_FragColor = vec4(0.4, 0.4, 0.45, 1.0); // Izgara Rengi
         }
     """.trimIndent()
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        GLES20.glClearColor(0.12f, 0.14f, 0.17f, 1.0f) 
+        GLES20.glClearColor(0.12f, 0.14f, 0.17f, 1.0f) // Koyu arka plan
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
 
         val vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
@@ -50,6 +50,7 @@ class MyRenderer : GLSurfaceView.Renderer {
             GLES20.glLinkProgram(it)
         }
 
+        // Izgara verisini oluştur (createGrid fonksiyonu aşağıda)
         val gridData = createGrid(20, 0.5f)
         gridVertexCount = gridData.size / 3
         gridBuffer = ByteBuffer.allocateDirect(gridData.size * 4).run {
@@ -61,10 +62,10 @@ class MyRenderer : GLSurfaceView.Renderer {
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
 
-        // Kamerayı ızgarayı görecek şekilde ayarla
+        // Kamera Açısı
         Matrix.setLookAtM(viewMatrix, 0, 8f, 10f, 15f, 0f, 0f, 0f, 0f, 1f, 0f)
         
-        // Kullanıcı döndürmesini uygula
+        // Dokunmatik hareketi uygula
         Matrix.setRotateM(rotationMatrix, 0, angleX, 0f, 1f, 0f)
         Matrix.rotateM(rotationMatrix, 0, angleY, 1f, 0f, 0f)
 
