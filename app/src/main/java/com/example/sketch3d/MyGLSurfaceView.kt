@@ -21,12 +21,10 @@ class MyGLSurfaceView(context: Context) : GLSurfaceView(context) {
 
         when (e.action) {
             MotionEvent.ACTION_MOVE -> {
-                val dx: Float = x - previousX
-                val dy: Float = y - previousY
-                
+                val dx = x - previousX
+                val dy = y - previousY
                 renderer.angleX += dx * 0.3f
                 renderer.angleY += dy * 0.3f
-                requestRender()
             }
         }
         previousX = x
