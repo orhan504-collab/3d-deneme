@@ -17,11 +17,8 @@ class MyRenderer : GLSurfaceView.Renderer {
     private val vPMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
     private val viewMatrix = FloatArray(16)
-    private val rotationMatrix = FloatArray(16)
 
-    var angleX: Float = 0f
-    var angleY: Float = 0f
-
+    // Shader kodlarını basitleştirdik ki hata riski sıfıra insin
     private val vertexShaderCode = """
         uniform mat4 uVPMatrix;
         attribute vec4 vPosition;
@@ -32,16 +29,14 @@ class MyRenderer : GLSurfaceView.Renderer {
 
     private val fragmentShaderCode = """
         precision mediump float;
-        uniform vec4 vColor;
         void main() {
-            gl_FragColor = vColor;
+            gl_FragColor = vec4(0.5, 0.5, 0.6, 1.0); // Izgara rengi: Gri-Mavi
         }
     """.trimIndent()
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        GLES20.glClearColor(0.15f, 0.17f, 0.2f, 1.0f)
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST)
-
+        GLES20.glClearColor(0.1f, 0.1f, 0.12f, 1.0f) // Arka plan koyu gri
+        
         val vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
         val fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode)
         program = GLES20.glCreateProgram().also {
@@ -50,55 +45,49 @@ class MyRenderer : GLSurfaceView.Renderer {
             GLES20.glLinkProgram(it)
         }
 
-        val gridData = createGrid(20, 20)
-        gridVertexCount = gridData.size / 3
-        gridBuffer = ByteBuffer.allocateDirect(gridData.size * 4).run {
+        // Grid (Tabla) Koordinatları
+        val gridData = mutableListOf<Float>()
+        for (i in -10..10) {
+            val f = i.toFloat() * 0.5f
+            gridData.addAll(listOf(f, 0f, -5f, f, 0f, 5f)) // Dikey
+            gridData.addAll(listOf(-5f, 0f, f, 5f, 0f, f)) // Yatay
+        }
+        val floatArray = gridData.toFloatArray()
+        gridVertexCount = floatArray.size / 3
+        gridBuffer = ByteBuffer.allocateDirect(floatArray.size * 4).run {
             order(ByteOrder.nativeOrder())
-            asFloatBuffer().apply { put(gridData); position(0) }
+            asFloatBuffer().apply { put(floatArray); position(0) }
         }
     }
 
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
-        Matrix.setLookAtM(viewMatrix, 0, 0f, 4f, 10f, 0f, 0f, 0f, 0f, 1f, 0f)
-        Matrix.setRotateM(rotationMatrix, 0, angleX, 0f, 1f, 0f)
-        Matrix.rotateM(rotationMatrix, 0, angleY, 1f, 0f, 0f)
-        
-        val tempMatrix = FloatArray(16)
-        Matrix.multiplyMM(tempMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
-        Matrix.multiplyMM(vPMatrix, 0, tempMatrix, 0, rotationMatrix, 0)
+
+        // Kamerayı izgarayı görecek şekilde ayarla (Açı çok önemli!)
+        Matrix.setLookAtM(viewMatrix, 0, 4f, 6f, 10f, 0f, 0f, 0f, 0f, 1f, 0f)
+        Matrix.multiplyMM(vPMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
 
         GLES20.glUseProgram(program)
-        GLES20.glUniformMatrix4fv(GLES20.glGetUniformLocation(program, "uVPMatrix"), 1, false, vPMatrix, 0)
-        
-        val posHandle = GLES20.glGetAttribLocation(program, "vPosition")
-        GLES20.glEnableVertexAttribArray(posHandle)
-        GLES20.glVertexAttribPointer(posHandle, 3, GLES20.GL_FLOAT, false, 0, gridBuffer)
-        GLES20.glUniform4f(GLES20.glGetUniformLocation(program, "vColor"), 0.4f, 0.4f, 0.5f, 1.0f)
-        GLES20.glDrawArrays(GLES20.GL_LINES, 0, gridVertexCount)
+        val matrixHandle = GLES20.glGetUniformLocation(program, "uVPMatrix")
+        GLES20.glUniformMatrix4fv(matrixHandle, 1, false, vPMatrix, 0)
+
+        val positionHandle = GLES20.glGetAttribLocation(program, "vPosition")
+        GLES20.glEnableVertexAttribArray(positionHandle)
+            GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, gridBuffer)
+            GLES20.glDrawArrays(GLES20.GL_LINES, 0, gridVertexCount)
+        GLES20.glDisableVertexAttribArray(positionHandle)
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
         val ratio = width.toFloat() / height.toFloat()
-        Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 50f)
+        Matrix.perspectiveM(projectionMatrix, 0, 45f, ratio, 0.1f, 100f)
     }
 
-    private fun loadShader(type: Int, shaderCode: String) = GLES20.glCreateShader(type).also {
-        GLES20.glShaderSource(it, shaderCode)
-        GLES20.glCompileShader(it)
-    }
-
-    private fun createGrid(xSize: Int, ySize: Int): FloatArray {
-        val vertices = mutableListOf<Float>()
-        val step = 0.5f
-        for (i in -xSize..xSize) {
-            val pos = i * step
-            vertices.add(pos); vertices.add(0f); vertices.add(-ySize * step)
-            vertices.add(pos); vertices.add(0f); vertices.add(ySize * step)
-            vertices.add(-xSize * step); vertices.add(0f); vertices.add(pos)
-            vertices.add(xSize * step); vertices.add(0f); vertices.add(pos)
+    private fun loadShader(type: Int, shaderCode: String): Int {
+        return GLES20.glCreateShader(type).also { shader ->
+            GLES20.glShaderSource(shader, shaderCode)
+            GLES20.glCompileShader(shader)
         }
-        return vertices.toFloatArray()
     }
 }
