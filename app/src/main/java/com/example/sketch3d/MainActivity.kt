@@ -16,9 +16,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         gLView = GLSurfaceView(this)
-        gLView.setEGLContextClientVersion(2) // OpenGL ES 2.0 kullan
+        gLView.setEGLContextClientVersion(2)
         gLView.setRenderer(MyRenderer())
         setContentView(gLView)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        gLView.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        gLView.onResume()
     }
 }
 
@@ -26,39 +36,33 @@ class MyRenderer : GLSurfaceView.Renderer {
     private var mProgram: Int = 0
     private lateinit var vertexBuffer: FloatBuffer
 
-    // Üçgenin koordinatları (x, y, z)
     private val triangleCoords = floatArrayOf(
-         0.0f,  0.5f, 0.0f, // Üst
-        -0.5f, -0.5f, 0.0f, // Sol alt
-         0.5f, -0.5f, 0.0f  // Sağ alt
+         0.0f,  0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f
     )
 
-    private val vertexShaderCode = """
-        attribute vec4 vPosition;
-        void main() {
-            gl_Position = vPosition;
-        }
-    """.trimIndent()
+    private val vertexShaderCode = 
+        "attribute vec4 vPosition;" +
+        "void main() {" +
+        "  gl_Position = vPosition;" +
+        "}"
 
-    private val fragmentShaderCode = """
-        precision mediump float;
-        void main() {
-            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); // Beyaz renk
-        }
-    """.trimIndent()
+    private val fragmentShaderCode = 
+        "precision mediump float;" +
+        "void main() {" +
+        "  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);" +
+        "}"
 
     override fun onSurfaceCreated(unused: GL10?, config: EGLConfig?) {
-        // Ekran temizleme rengini lacivert yap (Çalıştığını anlamak için)
         GLES20.glClearColor(0.0f, 0.0f, 0.3f, 1.0f)
 
-        // Koordinatları belleğe yükle
         val bb = ByteBuffer.allocateDirect(triangleCoords.size * 4)
         bb.order(ByteOrder.nativeOrder())
         vertexBuffer = bb.asFloatBuffer()
         vertexBuffer.put(triangleCoords)
         vertexBuffer.position(0)
 
-        // Shader'ları derle ve programı oluştur
         val vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
         val fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode)
 
@@ -73,12 +77,10 @@ class MyRenderer : GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
         GLES20.glUseProgram(mProgram)
 
-        // Pozisyon verisini shader'a bağla
         val positionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition")
         GLES20.glEnableVertexAttribArray(positionHandle)
         GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 12, vertexBuffer)
 
-        // Üçgeni çiz
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3)
         GLES20.glDisableVertexAttribArray(positionHandle)
     }
