@@ -16,10 +16,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Gradle
+      # HATA ÇÖZÜMÜ: Wrapper'ı sistemden bağımsız olarak baştan yaratıyoruz.
+      # Bu komut 'gradle-wrapper.jar' dosyasını otomatik oluşturur.
+      - name: Force Fix Gradle Wrapper
         run: |
+          mkdir -p gradle/wrapper
+          gradle wrapper --gradle-version 8.4 --distribution-type bin
           chmod +x gradlew
-          ./gradlew :app:assembleDebug
+
+      - name: Build with Gradle
+        run: ./gradlew :app:assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
