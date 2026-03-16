@@ -16,18 +16,18 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Hatanın kök çözümü: 
-      # 1. Wrapper'ı yeniden oluştur (jar dosyasını sıfırdan yaratır)
-      # 2. Çalıştırma iznini ver
-      - name: Setup Gradle Wrapper
+      # Gradle 9 yerine 8.4'ü zorunlu kılıyoruz
+      - name: Setup Gradle 8.4
         run: |
           gradle wrapper --gradle-version 8.4 --distribution-type bin
           chmod +x gradlew
 
+      # Hatanın detaylarını görmek için --stacktrace ve --info ekledik
       - name: Build with Gradle
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --stacktrace --info
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
