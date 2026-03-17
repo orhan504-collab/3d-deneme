@@ -1,4 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.Sketch3D" parent="android:Theme.Material.Light.NoActionBar" />
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.Sketch3D" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#1A237E</item>
+        <item name="colorPrimaryVariant">#000051</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        
+        <item name="colorSecondary">#00E676</item>
+        <item name="colorSecondaryVariant">#00B248</item>
+        <item name="colorOnSecondary">#000000</item>
+
+        <item name="android:windowBackground">#1A237E</item> <item name="colorSurface">#212121</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+
+        <item name="android:statusBarColor">#1A1A1A</item>
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <item name="colorControlHighlight">#40FFFFFF</item>
+    </style>
 </resources>
