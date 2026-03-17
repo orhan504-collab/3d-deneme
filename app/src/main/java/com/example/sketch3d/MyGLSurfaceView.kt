@@ -12,7 +12,7 @@ class MyGLSurfaceView(context: Context) : GLSurfaceView(context) {
     private var previousX: Float = 0f
     private var previousY: Float = 0f
 
-    // Zoom (Yakınlaşma/Uzaklaşma) için dedektör
+    // Zoom dedektörü
     private val scaleDetector: ScaleGestureDetector
 
     init {
@@ -20,26 +20,22 @@ class MyGLSurfaceView(context: Context) : GLSurfaceView(context) {
         setRenderer(renderer)
         renderMode = RENDERMODE_CONTINUOUSLY
 
-        // Zoom algılayıcıyı tanımlıyoruz
         scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {
-                // Renderer içindeki kamera mesafesini (zoom) değiştir
                 renderer.zoomScale *= detector.scaleFactor
-                // Zoom sınırları (Çok fazla uzaklaşmasın veya içine girmesin)
-                renderer.zoomScale = renderer.zoomScale.coerceIn(0.5f, 5.0f)
+                renderer.zoomScale = renderer.zoomScale.coerceIn(0.2f, 10.0f)
                 return true
             }
         })
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
-        // Önce iki parmakla zoom hareketini kontrol et
         scaleDetector.onTouchEvent(e)
 
         val x: Float = e.x
         val y: Float = e.y
 
-        // Eğer iki parmak ekrandaysa döndürme/taşıma yapma (Sadece zoom)
+        // İki parmak zoom yaparken rotasyon veya taşıma yapma
         if (e.pointerCount > 1) {
             previousX = x
             previousY = y
@@ -48,18 +44,26 @@ class MyGLSurfaceView(context: Context) : GLSurfaceView(context) {
 
         when (e.action) {
             MotionEvent.ACTION_DOWN -> {
-                // Dokunulan yerde bir küp var mı kontrolü ileride buraya gelecek
+                // Dokunma başladığında koordinatları kaydet
             }
             MotionEvent.ACTION_MOVE -> {
                 val dx = x - previousX
                 val dy = y - previousY
 
-                // EĞER "Taşıma Modu" aktifse (ileride eklenecek butonla):
-                // renderer.selectedCube?.let { it.posX += dx * 0.01f; it.posZ += dy * 0.01f }
-                
-                // Şimdilik varsayılan olarak dünyayı döndürüyoruz
-                renderer.angleX += dx * 0.3f
-                renderer.angleY += dy * 0.3f
+                // TAŞIMA MANTIĞI: 
+                // Renderer içindeki listeye otomatik eklenen ilk küpü hedef alıyoruz
+                val activeCube = renderer.cubes.firstOrNull()
+
+                if (activeCube != null) {
+                    // Küpü ızgara üzerinde (X ve Z ekseninde) kaydırıyoruz
+                    // Hassasiyeti zoom seviyesine göre ayarlıyoruz ki uzaktayken de rahat taşınsın
+                    activeCube.posX += dx * 0.1f * renderer.zoomScale
+                    activeCube.posZ += dy * 0.1f * renderer.zoomScale
+                } else {
+                    // Eğer küp yoksa ekranı döndürmeye devam et
+                    renderer.angleX += dx * 0.3f
+                    renderer.angleY += dy * 0.3f
+                }
             }
         }
 
