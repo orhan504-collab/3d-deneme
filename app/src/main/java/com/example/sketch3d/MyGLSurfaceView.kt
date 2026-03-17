@@ -55,8 +55,8 @@ class MyGLSurfaceView(context: Context, attrs: AttributeSet? = null) : GLSurface
                 val dy = y - previousY
 
                 // Hassasiyet katsayıları (Deneyerek optimize edildi)
-                val rotationFactor = 0.5f
-                val translationFactor = 0.8f * renderer.zoomScale
+                val rotationFactor = 0.3f
+                val translationFactor = 0.5f * renderer.zoomScale
 
                 val activeCube = renderer.cubes.firstOrNull()
                 
