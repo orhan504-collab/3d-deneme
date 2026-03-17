@@ -1,37 +1,69 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#121212">
 
-    <FrameLayout
-        android:id="@+id/gl_container"
+    <com.example.sketch3d.MyGLSurfaceView
+        android:id="@+id/myGLSurfaceView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_above="@+id/menusContainer" />
 
     <LinearLayout
+        android:id="@+id/menusContainer"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#E61A1A1A"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/btn_tools"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="?attr/selectableItemBackground"
-            android:src="@android:drawable/ic_menu_edit"
-            android:contentDescription="Tools" />
-            
-        <View android:layout_width="20dp" android:layout_height="0dp"/>
+        <HorizontalScrollView
+            android:id="@+id/detailToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="#2C2C2C"
+            android:visibility="gone">
 
-        <ImageButton
-            android:id="@+id/btn_add_cube"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:background="#2ECC71"
-            android:src="@android:drawable/ic_input_add"
-            android:contentDescription="Add Cube" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <LinearLayout style="@style/DetailButtonStyle">
+                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_make_face" />
+                    <TextView style="@style/DetailTextStyle" android:text="Yüzey oluştur" />
+                </LinearLayout>
+
+                <LinearLayout id="@+id/btnMerge" style="@style/DetailButtonStyle">
+                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_merge" />
+                    <TextView style="@style/DetailTextStyle" android:text="Birleştir" />
+                </LinearLayout>
+
+                <LinearLayout id="@+id/btnTargetWeld" style="@style/DetailButtonStyle">
+                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_target_weld" />
+                    <TextView style="@style/DetailTextStyle" android:text="Hedef birleştirme" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:id="@+id/mainToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:background="#1A1A1A"
+            android:orientation="horizontal"
+            android:weightSum="5">
+
+            <LinearLayout style="@style/MainMenuItemStyle">
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_expand_less" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Araçlar" android:textColor="#FFF" android:textSize="10sp" />
+            </LinearLayout>
+
+            <ImageButton android:id="@+id/btnVertexMode" style="@style/MainMenuItemStyle" android:src="@drawable/ic_dot_green" android:background="@drawable/menu_selector" />
+            <ImageButton android:id="@+id/btnEdgeMode" style="@style/MainMenuItemStyle" android:src="@drawable/ic_line" />
+            <ImageButton android:id="@+id/btnFaceMode" style="@style/MainMenuItemStyle" android:src="@drawable/ic_polygon" />
+            <ImageButton android:id="@+id/btnObjectMode" style="@style/MainMenuItemStyle" android:src="@drawable/ic_cube_outline" />
+        </LinearLayout>
     </LinearLayout>
 </RelativeLayout>
