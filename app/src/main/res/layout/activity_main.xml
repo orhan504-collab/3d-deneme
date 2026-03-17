@@ -29,7 +29,7 @@
                 android:orientation="horizontal"
                 android:padding="8dp">
 
-                <LinearLayout style="@style/DetailButtonStyle">
+                <LinearLayout android:id="@+id/btnMakeFace" style="@style/DetailButtonStyle">
                     <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_menu_add" />
                     <TextView style="@style/DetailTextStyle" android:text="Yüzey oluştur" />
                 </LinearLayout>
@@ -44,11 +44,6 @@
                     <TextView style="@style/DetailTextStyle" android:text="Hedef birleştirme" />
                 </LinearLayout>
 
-                <LinearLayout style="@style/DetailButtonStyle">
-                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_menu_sort_by_size" />
-                    <TextView style="@style/DetailTextStyle" android:text="Bağla" />
-                </LinearLayout>
-
             </LinearLayout>
         </HorizontalScrollView>
 
@@ -61,19 +56,15 @@
             android:weightSum="5">
 
             <LinearLayout style="@style/MainMenuItemStyle" android:orientation="vertical">
-                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/navigation_empty_icon" />
+                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_menu_more" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Araçlar" android:textColor="#FFF" android:textSize="10sp" />
             </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/btnVertexMode"
-                style="@style/MainMenuItemStyle"
-                android:src="@android:drawable/presence_online" /> <ImageButton android:id="@+id/btnEdgeMode" style="@style/MainMenuItemStyle" android:src="@android:drawable/ic_menu_edit" />
+            <ImageButton android:id="@+id/btnVertexMode" style="@style/MainMenuItemStyle" android:src="@android:drawable/presence_online" />
+            <ImageButton android:id="@+id/btnEdgeMode" style="@style/MainMenuItemStyle" android:src="@android:drawable/ic_menu_edit" />
             <ImageButton android:id="@+id/btnFaceMode" style="@style/MainMenuItemStyle" android:src="@android:drawable/ic_menu_gallery" />
             <ImageButton android:id="@+id/btnObjectMode" style="@style/MainMenuItemStyle" android:src="@android:drawable/ic_menu_help" />
-
         </LinearLayout>
     </LinearLayout>
-
 </RelativeLayout>
-                    
+                        
