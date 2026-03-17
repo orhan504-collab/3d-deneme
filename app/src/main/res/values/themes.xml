@@ -4,16 +4,18 @@
         <item name="colorPrimaryVariant">#000051</item>
         <item name="colorOnPrimary">#FFFFFF</item>
         
-        <item name="colorSecondary">#00E676</item>
-        <item name="colorSecondaryVariant">#00B248</item>
-        <item name="colorOnSecondary">#000000</item>
+        <item name="colorSecondary">#388E3C</item> <item name="colorSecondaryVariant">#2E7D32</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
 
-        <item name="android:windowBackground">#1A237E</item> <item name="colorSurface">#212121</item>
+        <item name="android:windowBackground">#121212</item> 
+        <item name="colorSurface">#1A1A1A</item>
         <item name="colorOnSurface">#FFFFFF</item>
 
         <item name="android:statusBarColor">#1A1A1A</item>
         <item name="android:windowLightStatusBar">false</item>
         
         <item name="colorControlHighlight">#40FFFFFF</item>
+
+        <item name="android:textColorPrimary">#FFFFFF</item>
     </style>
 </resources>
