@@ -8,40 +8,37 @@ import android.view.ScaleGestureDetector
 
 class MyGLSurfaceView(context: Context, attrs: AttributeSet? = null) : GLSurfaceView(context, attrs) {
 
-    // XML üzerinden yükleme için AttributeSet desteği eklendi
     val renderer: MyRenderer = MyRenderer(context)
-
     private var previousX: Float = 0f
     private var previousY: Float = 0f
     private val scaleDetector: ScaleGestureDetector
 
     init {
-        // OpenGL ES 2.0 ayarı
         setEGLContextClientVersion(2)
         setRenderer(renderer)
-        
-        // Verimlilik ve akıcılık için sürekli çizim modu
         renderMode = RENDERMODE_CONTINUOUSLY
 
-        // İki parmakla yakınlaştırma (Zoom) algılayıcısı
+        // Zoom (Ölçeklendirme) Algılayıcı
         scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {
-                renderer.zoomScale *= detector.scaleFactor
-                // Yakınlaştırma sınırları (0.1x - 10x)
-                renderer.zoomScale = renderer.zoomScale.coerceIn(0.1f, 10.0f)
+                // Zoom hassasiyetini artırdık
+                val scale = detector.scaleFactor
+                // Renderer'daki zoomScale değerini ters orantılı güncelliyoruz (Kamera yaklaşması için)
+                renderer.zoomScale /= scale 
+                renderer.zoomScale = renderer.zoomScale.coerceIn(0.1f, 5.0f)
                 return true
             }
         })
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
-        // Önce zoom hareketini işle
+        // Zoom işlemini kontrol et
         scaleDetector.onTouchEvent(e)
         
         val x = e.x
         val y = e.y
 
-        // Çoklu dokunma algılandığında döndürme/taşıma işlemini durdur
+        // İki parmakla zoom yapılıyorsa döndürme/taşıma işlemini iptal et
         if (e.pointerCount > 1) {
             previousX = x
             previousY = y
@@ -50,45 +47,35 @@ class MyGLSurfaceView(context: Context, attrs: AttributeSet? = null) : GLSurface
 
         when (e.action) {
             MotionEvent.ACTION_DOWN -> {
-                // Dokunma başladığında koordinatları kaydet (Sıçramayı önler)
                 previousX = x
                 previousY = y
-                
-                // İleride buraya: Dokunulan noktadaki Vertex/Edge seçimi için Raycasting eklenecek
             }
-            
             MotionEvent.ACTION_MOVE -> {
                 val dx = x - previousX
                 val dy = y - previousY
 
-                // Null güvenliği: Renderer içindeki nesne listesini kontrol et
-                try {
-                    val activeCube = renderer.cubes.firstOrNull()
-                    
+                // Hassasiyet katsayıları (Deneyerek optimize edildi)
+                val rotationFactor = 0.5f
+                val translationFactor = 0.8f * renderer.zoomScale
+
+                val activeCube = renderer.cubes.firstOrNull()
+                
+                // EKRANIN ALT KISMINDAKİ MENÜYE DEĞMİYORSA (Örn: Ekranın %80'inden yukarısı)
+                if (y < height * 0.8f) {
                     if (activeCube != null) {
-                        // Eğer bir küp varsa ve 'Obje Modu' gibi bir taşıma gerekiyorsa:
-                        // Hassasiyet zoom seviyesine göre dinamik olarak ayarlandı
-                        activeCube.posX += dx * 0.01f * renderer.zoomScale
-                        activeCube.posZ += dy * 0.01f * renderer.zoomScale
+                        // KÜP TAŞIMA: Hassasiyet artırıldı
+                        activeCube.posX += dx * translationFactor
+                        activeCube.posZ += dy * translationFactor
                     } else {
-                        // Küp yoksa sahneyi döndür (Gözlem modu)
-                        renderer.angleX += dx * 0.3f
-                        renderer.angleY += dy * 0.3f
+                        // SAHNE DÖNDÜRME: Daha hızlı tepki
+                        renderer.angleX += dx * rotationFactor
+                        renderer.angleY += dy * rotationFactor
                     }
-                } catch (ex: Exception) {
-                    // Liste boşsa veya henüz yüklenmediyse sessizce geç
                 }
             }
         }
-        
         previousX = x
         previousY = y
         return true
-    }
-
-    // Uygulama arka plana alındığında OpenGL döngüsünü durdurarak pil tasarrufu sağlar
-    override fun onPause() {
-        super.onPause()
-        // Gerekirse özel duraklatma mantığı buraya
     }
 }
