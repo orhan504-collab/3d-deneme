@@ -9,53 +9,70 @@ import java.nio.FloatBuffer
 class Cube {
     var posX = 0f
     var posZ = 0f
-    // 256mm'nin 1/4'ü = 64mm. OpenGL birimi olarak 64.0f kullanıyoruz.
-    var width = 64.0f 
-    var height = 64.0f
-    var depth = 64.0f
+    var isTransparent = false // İlk küp için true set edilecek
 
-    private val vertexBuffer: FloatBuffer
-    private val drawOrderBuffer: ByteBuffer
-
-    private val cubeCoords = floatArrayOf(
-        -0.5f,  1.0f,  0.5f,   // 0: Üst-Ön-Sol
-        -0.5f,  0.0f,  0.5f,   // 1: Alt-Ön-Sol (Taban ızgarada kalsın diye 0.0f)
-         0.5f,  0.0f,  0.5f,   // 2: Alt-Ön-Sağ
-         0.5f,  1.0f,  0.5f,   // 3: Üst-Ön-Sağ
-        -0.5f,  1.0f, -0.5f,   // 4: Üst-Arka-Sol
-        -0.5f,  0.0f, -0.5f,   // 5: Alt-Arka-Sol
-         0.5f,  0.0f, -0.5f,   // 6: Alt-Arka-Sağ
-         0.5f,  1.0f, -0.5f    // 7: Üst-Arka-Sağ
+    // 64mm boyutunda başlangıç koordinatları (Y ekseni 0'dan başlar)
+    // 8 Köşe * 3 Eksen (x, y, z)
+    private val corners = floatArrayOf(
+        -32f, 64f,  32f,  // 0: Üst-Ön-Sol
+        -32f,  0f,  32f,  // 1: Alt-Ön-Sol
+         32f,  0f,  32f,  // 2: Alt-Ön-Sağ
+         32f, 64f,  32f,  // 3: Üst-Ön-Sağ
+        -32f, 64f, -32f,  // 4: Üst-Arka-Sol
+        -32f,  0f, -32f,  // 5: Alt-Arka-Sol
+         32f,  0f, -32f,  // 6: Alt-Arka-Sağ
+         32f, 64f, -32f   // 7: Üst-Arka-Sağ
     )
 
     private val drawOrder = byteArrayOf(
-        0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, // Ön ve Arka
-        4, 0, 3, 4, 3, 7, 5, 1, 2, 5, 2, 6, // Üst ve Alt
-        4, 5, 1, 4, 1, 0, 3, 2, 6, 3, 6, 7  // Sol ve Sağ
+        0, 1, 2, 0, 2, 3, // Ön
+        4, 5, 6, 4, 6, 7, // Arka
+        4, 0, 3, 4, 3, 7, // Üst
+        5, 1, 2, 5, 2, 6, // Alt
+        4, 5, 1, 4, 1, 0, // Sol
+        3, 2, 6, 3, 6, 7  // Sağ
     )
 
-    init {
-        vertexBuffer = ByteBuffer.allocateDirect(cubeCoords.size * 4).run {
+    private var vertexBuffer: FloatBuffer = createVertexBuffer()
+    private val drawOrderBuffer: ByteBuffer = ByteBuffer.allocateDirect(drawOrder.size).apply {
+        put(drawOrder); position(0)
+    }
+
+    private fun createVertexBuffer(): FloatBuffer {
+        return ByteBuffer.allocateDirect(corners.size * 4).run {
             order(ByteOrder.nativeOrder())
-            asFloatBuffer().apply { put(cubeCoords); position(0) }
+            asFloatBuffer().apply { put(corners); position(0) }
         }
-        drawOrderBuffer = ByteBuffer.allocateDirect(drawOrder.size).apply {
-            put(drawOrder); position(0)
-        }
+    }
+
+    // Tek bir köşeyi (0-7 arası index) uzatmak için
+    fun updateCorner(index: Int, dx: Float, dy: Float, dz: Float) {
+        corners[index * 3] += dx
+        corners[index * 3 + 1] += dy
+        corners[index * 3 + 2] += dz
+        // Buffer'ı yeni koordinatlarla güncelle
+        vertexBuffer.put(corners)
+        vertexBuffer.position(0)
     }
 
     fun draw(vPMatrix: FloatArray, program: Int) {
         GLES20.glUseProgram(program)
 
-        // Koyu Mavi ve Dolgulu (Alpha = 1.0)
         val colorHandle = GLES20.glGetUniformLocation(program, "vColor")
-        GLES20.glUniform4fv(colorHandle, 1, floatArrayOf(0.0f, 0.1f, 0.4f, 1.0f), 0)
+        
+        if (isTransparent) {
+            // İlk açılıştaki küp: Şeffaf Beyaz/Gri
+            GLES20.glUniform4fv(colorHandle, 1, floatArrayOf(1.0f, 1.0f, 1.0f, 0.3f), 0)
+        } else {
+            // Kullanıcının eklediği küp: Koyu Mavi
+            GLES20.glUniform4fv(colorHandle, 1, floatArrayOf(0.0f, 0.1f, 0.4f, 1.0f), 0)
+        }
 
         val modelMatrix = FloatArray(16)
         val scratch = FloatArray(16)
         Matrix.setIdentityM(modelMatrix, 0)
+        // Pozisyonu sadece X ve Z'de kaydırıyoruz, Y ızgara üstünde sabit
         Matrix.translateM(modelMatrix, 0, posX, 0f, posZ)
-        Matrix.scaleM(modelMatrix, 0, width, height, depth)
         Matrix.multiplyMM(scratch, 0, vPMatrix, 0, modelMatrix, 0)
 
         val matrixHandle = GLES20.glGetUniformLocation(program, "uVPMatrix")
@@ -65,7 +82,6 @@ class Cube {
         GLES20.glEnableVertexAttribArray(posHandle)
         GLES20.glVertexAttribPointer(posHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
 
-        // GL_TRIANGLES kullanarak dolgulu çizim yapıyoruz
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.size, GLES20.GL_UNSIGNED_BYTE, drawOrderBuffer)
         GLES20.glDisableVertexAttribArray(posHandle)
     }
