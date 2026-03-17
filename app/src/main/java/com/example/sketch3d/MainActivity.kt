@@ -1,5 +1,6 @@
 package com.example.sketch3d
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.HorizontalScrollView
@@ -14,14 +15,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var detailToolbar: HorizontalScrollView
     private lateinit var btnVertexMode: ImageButton
     
-    // Seçili modu takip etmek için
+    // Aktif olan ana modu takip etmek için ("NONE", "VERTEX", "EDGE", "FACE")
     private var currentMainMode: String = "NONE"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Görünümleri Bağla
+        // XML'deki bileşenleri bağla
         myGLSurfaceView = findViewById(R.id.myGLSurfaceView)
         detailToolbar = findViewById(R.id.detailToolbar)
         btnVertexMode = findViewById(R.id.btnVertexMode)
@@ -30,73 +31,78 @@ class MainActivity : AppCompatActivity() {
         val btnFaceMode = findViewById<ImageButton>(R.id.btnFaceMode)
         val btnObjectMode = findViewById<ImageButton>(R.id.btnObjectMode)
 
-        // --- ANA MENÜ TIKLAMA İŞLEMLERİ ---
+        // --- ANA MENÜ TIKLAMA OLAYLARI ---
 
-        // Nokta (Vertex) Modu
+        // Nokta (Vertex) Modu: Tıklanınca detay menüsünü açar/kapatır
         btnVertexMode.setOnClickListener {
-            toggleDetailMenu("VERTEX", btnVertexMode)
+            handleMenuNavigation("VERTEX", btnVertexMode)
         }
 
         // Çizgi (Edge) Modu
         btnEdgeMode.setOnClickListener {
-            toggleDetailMenu("EDGE", btnEdgeMode)
-            Toast.makeText(this, "Çizgi Modu Aktif", Toast.LENGTH_SHORT).show()
+            handleMenuNavigation("EDGE", btnEdgeMode)
         }
 
         // Yüzey (Face) Modu
         btnFaceMode.setOnClickListener {
-            toggleDetailMenu("FACE", btnFaceMode)
+            handleMenuNavigation("FACE", btnFaceMode)
         }
 
-        // Obje Modu (Küp Ekleme/Seçme)
+        // Obje Modu: Sahneye yeni bir küp ekler
         btnObjectMode.setOnClickListener {
             detailToolbar.visibility = View.GONE
-            // Yeni küp ekleme fonksiyonunu çağırabilirsin
-            myGLSurfaceView.renderer.addCube(isInitial = false)
-            Toast.makeText(this, "Yeni Küp Eklendi", Toast.LENGTH_SHORT).show()
+            resetButtonBackgrounds()
+            // Renderer üzerinden yeni küp ekleme işlemini tetikle
+            myGLSurfaceView.renderer.addCube()
+            Toast.makeText(this, "Yeni nesne eklendi", Toast.LENGTH_SHORT).show()
         }
 
-        // --- DETAY MENÜ İŞLEMLERİ (2. Görseldeki İşlemler) ---
+        // --- DETAY MENÜ (ÜST BAR) İŞLEMLERİ ---
 
-        findViewById<LinearLayout>(R.id.btnMerge).setOnClickListener {
-            Toast.makeText(this, "Birleştirmek için noktaları seçin", Toast.LENGTH_SHORT).show()
-            // DrawingManager.startMergeAction() gibi bir tetikleyici eklenebilir
+        // Birleştir (Merge)
+        findViewById<LinearLayout>(R.id.btnMerge)?.setOnClickListener {
+            Toast.makeText(this, "Birleştirme modu aktif: İki nokta seçin", Toast.LENGTH_SHORT).show()
         }
 
-        findViewById<LinearLayout>(R.id.btnTargetWeld).setOnClickListener {
-            Toast.makeText(this, "Hedef noktayı seçin", Toast.LENGTH_SHORT).show()
+        // Hedef Birleştirme (Target Weld)
+        findViewById<LinearLayout>(R.id.btnTargetWeld)?.setOnClickListener {
+            Toast.makeText(this, "Hedef birleştirme: Kaynak ve hedef seçin", Toast.LENGTH_SHORT).show()
         }
     }
 
     /**
-     * Alt menüdeki ana modlar arasında geçiş yapar ve detay menüsünü gösterir/gizler.
+     * Menü geçişlerini yönetir ve seçili olan butonu vurgular.
      */
-    private fun toggleDetailMenu(mode: String, clickedButton: ImageButton) {
+    private fun handleMenuNavigation(mode: String, clickedButton: ImageButton) {
         if (currentMainMode == mode && detailToolbar.visibility == View.VISIBLE) {
-            // Aynı moda tekrar basıldıysa kapat
+            // Eğer zaten bu moddaysak menüyü kapat
             detailToolbar.visibility = View.GONE
-            clickedButton.setBackgroundResource(0)
+            clickedButton.setBackgroundColor(Color.TRANSPARENT)
             currentMainMode = "NONE"
         } else {
-            // Yeni bir mod seçildiyse aç
+            // Yeni bir moda geçiş yap
             detailToolbar.visibility = View.VISIBLE
-            resetMainButtons() // Diğer butonların efektini temizle
-            clickedButton.setBackgroundColor(android.graphics.Color.parseColor("#388E3C")) // Seçili efekti (Yeşil)
+            resetButtonBackgrounds()
+            
+            // Seçili butonu yeşil yap (Görseldeki gibi)
+            clickedButton.setBackgroundColor(Color.parseColor("#388E3C")) 
             currentMainMode = mode
             
-            // Renderer'a hangi modda olduğumuzu bildir (Köşelerin parlaması için)
-            // myGLSurfaceView.renderer.setSelectionMode(mode)
+            // Burada DrawingManager üzerinden seçim modunu değiştirebilirsin
         }
     }
 
-    private fun resetMainButtons() {
-        btnVertexMode.setBackgroundResource(0)
-        findViewById<ImageButton>(R.id.btnEdgeMode).setBackgroundResource(0)
-        findViewById<ImageButton>(R.id.btnFaceMode).setBackgroundResource(0)
-        findViewById<ImageButton>(R.id.btnObjectMode).setBackgroundResource(0)
+    /**
+     * Tüm ana menü butonlarının arka plan rengini temizler.
+     */
+    private fun resetButtonBackgrounds() {
+        btnVertexMode.setBackgroundColor(Color.TRANSPARENT)
+        findViewById<ImageButton>(R.id.btnEdgeMode).setBackgroundColor(Color.TRANSPARENT)
+        findViewById<ImageButton>(R.id.btnFaceMode).setBackgroundColor(Color.TRANSPARENT)
+        findViewById<ImageButton>(R.id.btnObjectMode).setBackgroundColor(Color.TRANSPARENT)
     }
 
-    // Uygulama duraklatıldığında OpenGL'i de duraklat
+    // Yaşam döngüsü yönetimi
     override fun onResume() {
         super.onResume()
         myGLSurfaceView.onResume()
