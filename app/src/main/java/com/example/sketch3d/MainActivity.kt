@@ -19,9 +19,16 @@ class MainActivity : Activity() {
         glView = MyGLSurfaceView(this)
         binding.glContainer.addView(glView)
 
-        // Butonlara erişim artık çok daha kolay ve güvenli
+        // Yeşil Artı Butonuna Tıklama Olayı
         binding.btnAddCube.setOnClickListener {
-            // Küp ekleme kodu buraya gelecek
+            // Renderer içindeki listeye küp ekle
+            glView?.renderer?.addCube()
+            
+            /* MyGLSurfaceView içinde RENDERMODE_CONTINUOUSLY kullandığımız için 
+               requestRender() çağırmaya teknik olarak gerek yok, 
+               ama alışkanlık olması açısından durabilir.
+            */
+            glView?.requestRender()
         }
     }
 
