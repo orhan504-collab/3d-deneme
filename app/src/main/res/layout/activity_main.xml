@@ -1,7 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#121212">
+    android:layout_height="match_parent">
 
     <com.example.sketch3d.MyGLSurfaceView
         android:id="@+id/myGLSurfaceView"
@@ -19,7 +19,7 @@
         <HorizontalScrollView
             android:id="@+id/detailToolbar"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="85dp"
             android:background="#2C2C2C"
             android:visibility="gone">
 
@@ -30,18 +30,23 @@
                 android:padding="8dp">
 
                 <LinearLayout style="@style/DetailButtonStyle">
-                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_make_face" />
+                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_menu_add" />
                     <TextView style="@style/DetailTextStyle" android:text="Yüzey oluştur" />
                 </LinearLayout>
 
-                <LinearLayout id="@+id/btnMerge" style="@style/DetailButtonStyle">
-                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_merge" />
+                <LinearLayout android:id="@+id/btnMerge" style="@style/DetailButtonStyle">
+                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_menu_share" />
                     <TextView style="@style/DetailTextStyle" android:text="Birleştir" />
                 </LinearLayout>
 
-                <LinearLayout id="@+id/btnTargetWeld" style="@style/DetailButtonStyle">
-                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_target_weld" />
+                <LinearLayout android:id="@+id/btnTargetWeld" style="@style/DetailButtonStyle">
+                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_menu_send" />
                     <TextView style="@style/DetailTextStyle" android:text="Hedef birleştirme" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/DetailButtonStyle">
+                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_menu_sort_by_size" />
+                    <TextView style="@style/DetailTextStyle" android:text="Bağla" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -55,15 +60,20 @@
             android:orientation="horizontal"
             android:weightSum="5">
 
-            <LinearLayout style="@style/MainMenuItemStyle">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_expand_less" />
+            <LinearLayout style="@style/MainMenuItemStyle" android:orientation="vertical">
+                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/navigation_empty_icon" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Araçlar" android:textColor="#FFF" android:textSize="10sp" />
             </LinearLayout>
 
-            <ImageButton android:id="@+id/btnVertexMode" style="@style/MainMenuItemStyle" android:src="@drawable/ic_dot_green" android:background="@drawable/menu_selector" />
-            <ImageButton android:id="@+id/btnEdgeMode" style="@style/MainMenuItemStyle" android:src="@drawable/ic_line" />
-            <ImageButton android:id="@+id/btnFaceMode" style="@style/MainMenuItemStyle" android:src="@drawable/ic_polygon" />
-            <ImageButton android:id="@+id/btnObjectMode" style="@style/MainMenuItemStyle" android:src="@drawable/ic_cube_outline" />
+            <ImageButton
+                android:id="@+id/btnVertexMode"
+                style="@style/MainMenuItemStyle"
+                android:src="@android:drawable/presence_online" /> <ImageButton android:id="@+id/btnEdgeMode" style="@style/MainMenuItemStyle" android:src="@android:drawable/ic_menu_edit" />
+            <ImageButton android:id="@+id/btnFaceMode" style="@style/MainMenuItemStyle" android:src="@android:drawable/ic_menu_gallery" />
+            <ImageButton android:id="@+id/btnObjectMode" style="@style/MainMenuItemStyle" android:src="@android:drawable/ic_menu_help" />
+
         </LinearLayout>
     </LinearLayout>
+
 </RelativeLayout>
+                    
