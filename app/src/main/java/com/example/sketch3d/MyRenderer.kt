@@ -11,9 +11,12 @@ import javax.microedition.khronos.opengles.GL10
 
 class MyRenderer : GLSurfaceView.Renderer {
 
-    // Dokunmatik hareketler için değişkenler
+    // Dokunmatik hareketler için dışarıdan güncellenen açılar
     var angleX: Float = 0f
     var angleY: Float = 0f
+
+    // Küpleri sakladığımız liste
+    private val cubes = mutableListOf<Cube>()
 
     private var program: Int = 0
     private lateinit var gridBuffer: FloatBuffer
@@ -25,7 +28,7 @@ class MyRenderer : GLSurfaceView.Renderer {
     private val viewMatrix = FloatArray(16)
     private val rotationMatrix = FloatArray(16)
 
-    // Shader Kodları
+    // Shader Kodları (Hem ızgara hem küp için ortak kullanılabilir)
     private val vertexShaderCode = """
         uniform mat4 uVPMatrix;
         attribute vec4 vPosition;
@@ -37,17 +40,21 @@ class MyRenderer : GLSurfaceView.Renderer {
     private val fragmentShaderCode = """
         precision mediump float;
         void main() {
-            gl_FragColor = vec4(0.5, 0.5, 0.55, 1.0); // Izgara rengi (Açık Gri)
+            gl_FragColor = vec4(0.8, 0.8, 0.8, 1.0); // Çizgi rengi (Açık Gri/Beyaz)
         }
     """.trimIndent()
 
+    // MainActivity'den çağrılacak küp ekleme fonksiyonu
+    fun addCube() {
+        cubes.add(Cube())
+    }
+
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        // 1. ADIM: Arka plan rengini Koyu Mavi yap (Çalıştığını anlamak için)
+        // Arka plan: Koyu Mavi
         GLES20.glClearColor(0.1f, 0.2f, 0.4f, 1.0f) 
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
 
         try {
-            // ShaderUtils kullanarak shaderları yükle
             val vertexShader = ShaderUtils.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
             val fragmentShader = ShaderUtils.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode)
 
@@ -62,7 +69,7 @@ class MyRenderer : GLSurfaceView.Renderer {
             e.printStackTrace()
         }
 
-        // 2. ADIM: Izgara (Grid) verisini oluştur
+        // Izgara verisini oluştur (20 birim büyüklüğünde)
         val gridData = createGrid(20, 1.0f)
         gridVertexCount = gridData.size / 3
         gridBuffer = ByteBuffer.allocateDirect(gridData.size * 4).run {
@@ -75,35 +82,36 @@ class MyRenderer : GLSurfaceView.Renderer {
     }
 
     override fun onDrawFrame(gl: GL10?) {
-        // Ekranı temizle
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
 
-        // ÇÖKMEYİ ÖNLEYEN KONTROL: Eğer program veya buffer hazır değilse çizme
         if (program == 0 || !::gridBuffer.isInitialized) return
 
-        // 3. ADIM: Kamerayı ayarla (Görsel #2'deki gibi perspektif için)
+        // 1. Kamerayı ayarla
         Matrix.setLookAtM(viewMatrix, 0, 10f, 12f, 20f, 0f, 0f, 0f, 0f, 1f, 0f)
 
-        // Rotasyonları uygula
+        // 2. Dokunmatik rotasyonları hesapla
         Matrix.setRotateM(rotationMatrix, 0, angleX, 0f, 1f, 0f)
         Matrix.rotateM(rotationMatrix, 0, angleY, 1f, 0f, 0f)
 
-        // Matrisleri birleştir
+        // 3. Matrisleri birleştir (Projection * View * Rotation)
         val tempMatrix = FloatArray(16)
         Matrix.multiplyMM(tempMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
         Matrix.multiplyMM(vPMatrix, 0, tempMatrix, 0, rotationMatrix, 0)
 
-        // Çizimi yap
+        // 4. Izgarayı Çiz
         GLES20.glUseProgram(program)
-
         val matrixHandle = GLES20.glGetUniformLocation(program, "uVPMatrix")
         GLES20.glUniformMatrix4fv(matrixHandle, 1, false, vPMatrix, 0)
 
         val posHandle = GLES20.glGetAttribLocation(program, "vPosition")
         GLES20.glEnableVertexAttribArray(posHandle)
         GLES20.glVertexAttribPointer(posHandle, 3, GLES20.GL_FLOAT, false, 0, gridBuffer)
-
         GLES20.glDrawArrays(GLES20.GL_LINES, 0, gridVertexCount)
+
+        // 5. Eklenen tüm Küpleri Çiz
+        for (cube in cubes) {
+            cube.draw(vPMatrix, program)
+        }
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -116,9 +124,7 @@ class MyRenderer : GLSurfaceView.Renderer {
         val v = mutableListOf<Float>()
         for (i in -size..size) {
             val p = i * step
-            // X çizgileri
             v.addAll(listOf(p, 0f, -size * step, p, 0f, size * step))
-            // Z çizgileri
             v.addAll(listOf(-size * step, 0f, p, size * step, 0f, p))
         }
         return v.toFloatArray()
